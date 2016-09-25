@@ -1,10 +1,17 @@
 (function() {
-	function SongPlayer() {
+	function SongPlayer($rootScope, Fixtures) {
 		
 		var SongPlayer = {};
-
+		
 // Private Attributes //		
 
+/**
+* @desc Current album information
+* @type {Object}
+*/
+
+		var currentAlbum = Fixtures.getAlbum();
+		
 /**
 * @desc Buzz object audio file
 * @type {Object}
@@ -20,14 +27,19 @@
 */		
 		var setSong = function(song) {
 			if (currentBuzzObject) {
-				currentBuzzObject.stop();
-				SongPlayer.currentSong.playing = null;
+				stopSong(song);
 			}
 			
 			currentBuzzObject = new buzz.sound(song.audioUrl, {
 				formats: ['mp3'],
 				preload: true
 			});
+			
+			currentBuzzObject.bind('timeupdate', function() {
+				$rootScope.$apply(function() {
+					SongPlayer.currentTime = currentBuzzObject.getTime();
+				});
+		   });
 			
 			SongPlayer.currentSong = song;
 		};
@@ -42,15 +54,42 @@
 			song.playing = true;
 		};
 
+/**
+* @function stopSong
+* @desc Stop a song
+* @param {Object} song
+*/		
+		var stopSong = function(song) {
+			currentBuzzObject.stop();
+			song.playing = null;
+		};
+		
+		
+/**
+* @function getSongIndex
+* @desc Get index of song in the song array
+* @type {object} song
+* @returns {number}
+*/
+		var getSongIndex = function(song) {
+			return currentAlbum.song.indexOf(song);
+		};
+		
 		
 // Public Attributes //
-		
+
 /**
 * @desc Active song object from list of songs
 * @type {object}
 */
 		
 		SongPlayer.currentSong = null;
+		
+/**
+* @desc Current playback time (in seconds) of currently playing song
+* @type {number}
+*/
+		SongPlayer.currentTime = null;
 
 //Public Methods //
 		
@@ -73,6 +112,56 @@
 		};
 
 /**
+* @function Previous
+* @desc Change song to previous song in album
+*/		
+		
+		SongPlayer.previous = function() {
+			var currentSongIndex = getSongIndex(SongPlayer.currentSong);
+			currentSongIndex--;
+			
+			if (currentSongIndex < 0) {
+				stopSong(song);
+			} else {
+				var song = currentAlbum.songs[currentSongIndex];
+				setSong(song);
+				playSong(song);
+			}
+		};
+
+/**
+* @function Next
+* @desc Change song to next song in album
+*/		
+		
+		SongPlayer.next = function() {
+			var currentSongIndex = getSongIndex(SongPlayer.currentSong);
+			currentSongIndex++;
+			
+			var lastSongOfIndex = currentAlbum.songs.length - 1;
+			
+			if (currentSongIndex > lastSongOfIndex) {
+				stopSong(song);
+			} else {
+				var song = currentAlbum.songs[currentSongIndex];
+				setSong(song);
+				playSong(song);
+			}
+		};		
+		
+ /**
+ * @function setCurrentTime
+ * @desc Set current time (in seconds) of currently playing song
+ * @param {Number} time
+ */
+		SongPlayer.setCurrentTime = function(time) {
+			if(currentBuzzObject) {
+				currentBuzzObject.setTime(time);
+			}
+		};
+		
+		
+/**
 * @function Pause
 * @desc Pause current song
 * @param {Object} song
@@ -84,10 +173,12 @@
 			song.playing = false;
 		};
 		
+	
+		
 		return SongPlayer;
 	}
 	
 	angular
 		.module('blocJams')
-		.factory('SongPlayer', SongPlayer);
+		.factory('SongPlayer', ['$rootScope', 'Fixtures', SongPlayer]);
 })();
