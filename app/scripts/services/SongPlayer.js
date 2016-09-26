@@ -90,6 +90,12 @@
 * @type {number}
 */
 		SongPlayer.currentTime = null;
+		
+/**
+* @desc Volume used for songs
+* @type {number}
+*/
+		SongPlayer.volume = 80;
 
 //Public Methods //
 		
@@ -149,18 +155,6 @@
 			}
 		};		
 		
- /**
- * @function setCurrentTime
- * @desc Set current time (in seconds) of currently playing song
- * @param {Number} time
- */
-		SongPlayer.setCurrentTime = function(time) {
-			if(currentBuzzObject) {
-				currentBuzzObject.setTime(time);
-			}
-		};
-		
-		
 /**
 * @function Pause
 * @desc Pause current song
@@ -173,8 +167,29 @@
 			song.playing = false;
 		};
 		
-	
-		
+ /**
+ * @function setCurrentTime
+ * @desc Set current time (in seconds) of currently playing song
+ * @param {Number} time
+ */
+		SongPlayer.setCurrentTime = function(time) {
+			if (currentBuzzObject) {
+				currentBuzzObject.setTime(time);
+			}
+		};
+			
+ /**
+ * @function setVolume
+ * @desc Set volume for song
+ * @param {Number} volume
+ */		
+		SongPlayer.setVolume = function(volume) {
+			if (currentBuzzObject) {
+				currentBuzzObject.setVolume(volume);
+			}
+			SongPlayer.volume = volume;
+		};
+				
 		return SongPlayer;
 	}
 	
