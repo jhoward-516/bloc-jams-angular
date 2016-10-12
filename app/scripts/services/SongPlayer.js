@@ -27,7 +27,8 @@
 */		
 		var setSong = function(song) {
 			if (currentBuzzObject) {
-				stopSong(song);
+				currentBuzzObject.stop();
+				SongPlayer.currentSong.playing = null;
 			}
 			
 			currentBuzzObject = new buzz.sound(song.audioUrl, {
@@ -72,7 +73,7 @@
 * @returns {number}
 */
 		var getSongIndex = function(song) {
-			return currentAlbum.song.indexOf(song);
+			return currentAlbum.songs.indexOf(song);
 		};
 		
 		
